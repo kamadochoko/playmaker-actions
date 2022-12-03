@@ -14,8 +14,9 @@ public class asyncHandler : MonoBehaviour
     public string awaitCompleteEvent;
 
 
-    public void setEvent(string _await1sendEvent, string _await2sendEvent, string _await3sendEvent, string _awaitCompleteEvent)
+    public void sendEvent(string _await1sendEvent, string _await2sendEvent, string _await3sendEvent, string _awaitCompleteEvent)
     {
+
         Debug.Log("setEvent");
         await1sendEvent = _await1sendEvent;
         await2sendEvent = _await2sendEvent;
@@ -28,7 +29,6 @@ public class asyncHandler : MonoBehaviour
     public async void Start()
     {
 
-        // var cancellationToken = this.GetCancellationTokenOnDestroy();
         var cts = new CancellationTokenSource();
         CancellationToken cancellationToken = cts.Token;
 
@@ -36,66 +36,47 @@ public class asyncHandler : MonoBehaviour
 
         var (msg1, msg2, msg3)
                 = await UniTask.WhenAll(
-                GetAwait1(cancellationToken),
-                GetAwait2(cancellationToken),
-                GetAwait3(cancellationToken)
+                GetAwait(await1sendEvent, cancellationToken),
+                GetAwait(await2sendEvent, cancellationToken),
+                GetAwait(await3sendEvent, cancellationToken)
                 );
 
-        Debug.Log(msg3 + "->" + msg1 + "->" + msg2);
+        Debug.Log(msg1 + "->" + msg2 + "->" + msg3);
 
-        fsm.SendEvent(awaitCompleteEvent);
+        if (awaitCompleteEvent is not null)
+        {
+            fsm.SendEvent(awaitCompleteEvent);
 
-        Debug.Log("Complete!");
+            Debug.Log("awaitCompleteEvent!");
+
+        }
 
         cts.Cancel();
 
     }
 
 
-    private async UniTask<string> GetAwait1(CancellationToken cancellationToken)
+    private async UniTask<string> GetAwait(string sendEvent, CancellationToken cancellationToken)
     {
+
         cancellationToken.ThrowIfCancellationRequested();
-        try
+
+        if (sendEvent is not null)
         {
-            await UniTask.Delay(2000);
-            fsm.SendEvent(await1sendEvent);
+
+            try
+            {
+                await UniTask.Yield();
+                fsm.SendEvent(sendEvent);
+            }
+            catch (OperationCanceledException e)
+            {
+                Debug.Log(e.Message);
+            }
         }
-        catch (OperationCanceledException e)
-        {
-            Debug.Log(e.Message);
-        }
-        return "await1";
+
+        return sendEvent;
+        
     }
 
-
-    private async UniTask<string> GetAwait2(CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        try
-        {
-            await UniTask.Delay(3000);
-            fsm.SendEvent(await2sendEvent);
-        }
-        catch (OperationCanceledException e)
-        {
-            Debug.Log(e.Message);
-        }
-        return "await2";
-    }
-
-
-    private async UniTask<string> GetAwait3(CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        try
-        {
-            await UniTask.Delay(1000);
-            fsm.SendEvent(await3sendEvent);
-        }
-        catch (OperationCanceledException e)
-        {
-            Debug.Log(e.Message);
-        }
-        return "await3";
-    }
 }

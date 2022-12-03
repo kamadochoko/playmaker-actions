@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
-using HutongGames.PlayMaker;
-using HutongGames.PlayMaker.Actions;
+using System;
+using System.Threading;
 using UnityEngine;
 
 public class asyncHandler : MonoBehaviour
@@ -28,36 +28,74 @@ public class asyncHandler : MonoBehaviour
     public async void Start()
     {
 
+        // var cancellationToken = this.GetCancellationTokenOnDestroy();
+        var cts = new CancellationTokenSource();
+        CancellationToken cancellationToken = cts.Token;
+
         Debug.Log("async void Start");
+
         var (msg1, msg2, msg3)
-                = await UniTask.WhenAll(GetAwait1(), GetAwait2(), GetAwait3());
+                = await UniTask.WhenAll(
+                GetAwait1(cancellationToken),
+                GetAwait2(cancellationToken),
+                GetAwait3(cancellationToken)
+                );
+
         Debug.Log(msg3 + "->" + msg1 + "->" + msg2);
 
-
         fsm.SendEvent(awaitCompleteEvent);
+
         Debug.Log("Complete!");
+
+        cts.Cancel();
 
     }
 
 
-    private async UniTask<string> GetAwait1()
+    private async UniTask<string> GetAwait1(CancellationToken cancellationToken)
     {
-        await UniTask.Delay(2000);
-        fsm.SendEvent(await1sendEvent);
+        cancellationToken.ThrowIfCancellationRequested();
+        try
+        {
+            await UniTask.Delay(2000);
+            fsm.SendEvent(await1sendEvent);
+        }
+        catch (OperationCanceledException e)
+        {
+            Debug.Log(e.Message);
+        }
         return "await1";
     }
 
-    private async UniTask<string> GetAwait2()
+
+    private async UniTask<string> GetAwait2(CancellationToken cancellationToken)
     {
-        await UniTask.Delay(3000);
-        fsm.SendEvent(await2sendEvent);
+        cancellationToken.ThrowIfCancellationRequested();
+        try
+        {
+            await UniTask.Delay(3000);
+            fsm.SendEvent(await2sendEvent);
+        }
+        catch (OperationCanceledException e)
+        {
+            Debug.Log(e.Message);
+        }
         return "await2";
     }
 
-    private async UniTask<string> GetAwait3()
+
+    private async UniTask<string> GetAwait3(CancellationToken cancellationToken)
     {
-        await UniTask.Delay(1000);
-        fsm.SendEvent(await3sendEvent);
+        cancellationToken.ThrowIfCancellationRequested();
+        try
+        {
+            await UniTask.Delay(1000);
+            fsm.SendEvent(await3sendEvent);
+        }
+        catch (OperationCanceledException e)
+        {
+            Debug.Log(e.Message);
+        }
         return "await3";
     }
 }

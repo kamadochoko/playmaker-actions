@@ -1,4 +1,3 @@
-
 namespace HutongGames.PlayMaker.Actions
 {
 
@@ -10,10 +9,10 @@ namespace HutongGames.PlayMaker.Actions
 
         public asyncHandler asyncHandler;
 
-        public FsmEvent await1sendEvent;
-        public FsmEvent await2sendEvent;
-        public FsmEvent await3sendEvent;
-        public FsmEvent awaitCompleteEvent;
+        public FsmEvent sendEvent1;
+        public FsmEvent sendEvent2;
+        public FsmEvent sendEvent3;
+        public FsmEvent completeEvent;
 
 
         // Code that runs on entering the state.
@@ -21,10 +20,10 @@ namespace HutongGames.PlayMaker.Actions
         {
 
             asyncHandler = null;
-            await1sendEvent = null;
-            await2sendEvent = null;
-            await3sendEvent = null;
-            awaitCompleteEvent = null;
+            sendEvent1 = null;
+            sendEvent2 = null;
+            sendEvent3 = null;
+            completeEvent = null;
 
         }
 
@@ -32,7 +31,7 @@ namespace HutongGames.PlayMaker.Actions
         public override void OnEnter()
         {
 
-            asyncHandler.sendEvent(await1sendEvent?.Name, await2sendEvent?.Name, await3sendEvent?.Name, awaitCompleteEvent?.Name);
+            asyncHandler.startAsync(sendEvent1?.Name, sendEvent2?.Name, sendEvent3?.Name, completeEvent?.Name);
 
         }
 

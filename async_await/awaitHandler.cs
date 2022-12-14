@@ -1,3 +1,5 @@
+
+using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 
@@ -6,13 +8,14 @@ namespace HutongGames.PlayMaker.Actions
     public class awaitHandler : FsmStateAction
     {
 
-
         public asyncHandler asyncHandler;
 
-        public FsmEvent sendEvent1;
-        public FsmEvent sendEvent2;
-        public FsmEvent sendEvent3;
-        public FsmEvent completeEvent;
+        public FsmString sendEventName1;
+        public FsmString sendEventName2;
+        public FsmString sendEventName3;
+        public FsmString completeEventName;
+        public FsmBool isDelay;
+        public FsmFloat delaySec;
 
 
         // Code that runs on entering the state.
@@ -20,18 +23,19 @@ namespace HutongGames.PlayMaker.Actions
         {
 
             asyncHandler = null;
-            sendEvent1 = null;
-            sendEvent2 = null;
-            sendEvent3 = null;
-            completeEvent = null;
+            sendEventName1 = null;
+            sendEventName2 = null;
+            sendEventName3 = null;
+            completeEventName = null;
+            isDelay = null;
+            delaySec = null;
 
         }
-
 
         public override void OnEnter()
         {
 
-            asyncHandler.startAsync(sendEvent1?.Name, sendEvent2?.Name, sendEvent3?.Name, completeEvent?.Name);
+            asyncHandler.startAsync(sendEventName1.Value, sendEventName2.Value, sendEventName3.Value, completeEventName.Value, isDelay.Value, delaySec.Value);
 
         }
 

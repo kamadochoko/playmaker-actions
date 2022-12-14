@@ -10,28 +10,31 @@ public class asyncHandler : MonoBehaviour
 
     private readonly CancellationTokenSource cts = new CancellationTokenSource();
 
-
-    public async void startAsync(string sendEvent1, string sendEvent2, string sendEvent3, string completeEvent)
+    public async void startAsync(string sendEventName1, string sendEventName2, string sendEventName3, string completeEventName,
+        bool isDelay, float delaySec)
     {
 
         //Debug.Log(">>>> async void Start <<<<");
-
         CancellationToken cancellationToken = cts.Token;
 
+        // Debug.Log(Thread.CurrentThread.ManagedThreadId);
+        if (isDelay == true && delaySec > 0f)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(delaySec));
+        }
+
         var (msg1, msg2, msg3) = await UniTask.WhenAll(
-            sendGlobalTransition(sendEvent1, cancellationToken),
-            sendGlobalTransition(sendEvent2, cancellationToken),
-            sendGlobalTransition(sendEvent3, cancellationToken)
+            sendGlobalTransition(sendEventName1, cancellationToken),
+            sendGlobalTransition(sendEventName2, cancellationToken),
+            sendGlobalTransition(sendEventName3, cancellationToken)
             );
 
-        //Debug.Log(msg1 + "->" + msg2 + "->" + msg3);
+        // Debug.Log(msg1 + "->" + msg2 + "->" + msg3);
 
-        if (completeEvent is not null)
+        if (completeEventName is not null)
         {
-
-            fsm.SendEvent(completeEvent);
-
-            //Debug.Log("completeEvent");
+            // Debug.Log("completeEventName");
+            fsm.SendEvent(completeEventName);
 
         }
 
@@ -50,11 +53,9 @@ public class asyncHandler : MonoBehaviour
     public async UniTask<string> sendGlobalTransition(string sendEvent, CancellationToken cancellationToken)
     {
 
+        // Debug.Log("sendGlobalTransition=>" + sendEvent);
         cancellationToken.ThrowIfCancellationRequested();
 
-        await UniTask.SwitchToThreadPool();
-
-        //await UniTask.Delay(TimeSpan.FromSeconds(1));
 
         if (sendEvent is not null)
         {
@@ -62,7 +63,11 @@ public class asyncHandler : MonoBehaviour
             try
             {
 
+                // Debug.Log(Thread.CurrentThread.ManagedThreadId);
+                await UniTask.SwitchToThreadPool();
+
                 await UniTask.Yield();
+                // Debug.Log(Thread.CurrentThread.ManagedThreadId);
                 fsm.SendEvent(sendEvent);
 
             }
